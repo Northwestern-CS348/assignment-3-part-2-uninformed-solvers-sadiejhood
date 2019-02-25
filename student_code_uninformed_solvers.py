@@ -15,7 +15,7 @@ class SolverDFS(UninformedSolver):
             ((3,), (2,), (1,)): False,
             ((3,), (1, 2), ()): False,
             ((3,), (), (1,2)): False,
-            ((), (1, 2), (3)): False,
+            ((), (1, 2), (3,)): False,
             ((3,), (1, 2), ()): False,
             ((), (3,), (1,2)): False,
             ((3,), (), (1,2)): False,
@@ -66,6 +66,21 @@ class SolverDFS(UninformedSolver):
                     # print("Depth " + str(self.currentState.depth + 1))
                     # print("Parent " + str(new_state.parent.requiredMovable))
                     # print('\n')
+
+        # print("Parent")
+        # print(str(self.currentState.state) + " " + str(self.currentState.depth))
+        # for c in self.currentState.children:
+        #     print(c.state)
+        # print("Movables")
+        # for m in self.gm.getMovables():
+        #     print(m)
+        # facts = self.gm.kb.facts
+        # for f in facts:
+        #     if (str(f.statement.predicate) == "top"):
+        #         print(f.statement)
+        #     if (str(f.statement.predicate) == "empty"):
+        #         print(f.statement)
+        # print('\n')
 
         if (self.currentState.nextChildToVisit + 1 > len(self.currentState.children)):
             # print(self.currentState.state)

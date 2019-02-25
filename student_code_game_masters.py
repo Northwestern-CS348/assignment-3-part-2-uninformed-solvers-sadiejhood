@@ -119,11 +119,11 @@ class TowerOfHanoiGame(GameMaster):
         retracted = []
         added = []
         facts = self.kb.facts
-        print(self.getGameState())
-        for f in facts:
-            if(f.statement.predicate == "movable"):
-                print(f)
-        print("\n")
+        # print(self.getGameState())
+        # for f in facts:
+        #     if(f.statement.predicate == "movable"):
+        #         print(f)
+        # print("\n")
 
         # fs = self.getMovables()
         #
@@ -135,9 +135,23 @@ class TowerOfHanoiGame(GameMaster):
         object = movable_statement.terms[0]
         old_location = movable_statement.terms[1]
 
-        old_stack = self.kb.kb_ask(Fact(Statement(["onTopOf", object, "?X"])))
-        new_is_empty = self.kb.kb_ask(Fact(Statement(["empty", new_location])))
-        new_stack = self.kb.kb_ask(Fact(Statement(["on", "?x", new_location])))
+        old_stack = False
+        new_stack = False
+
+        for f in facts:
+            if (Fact(Statement(["onTopOf", object, "disk2"])) == f):
+                old_stack = "disk2"
+            elif (Fact(Statement(["onTopOf", object, "disk3"])) == f):
+                old_stack = "disk3"
+
+            if (Fact(Statement(["on", "disk2", new_location])) == f):
+                new_stack = "disk2"
+            elif (Fact(Statement(["on", "disk3", new_location])) == f):
+                new_stack = "disk3"
+
+        # old_stack = self.kb.kb_ask(Fact(Statement(["onTopOf", object, "?X"])))
+        new_is_empty = Fact(Statement(["empty", new_location])) in facts
+        # new_stack = self.kb.kb_ask(Fact(Statement(["on", "?x", new_location])))
 
         # print(old_stack.list_of_bindings[0][0].bindings_dict["?X"])
         # print("OLD")
@@ -150,33 +164,39 @@ class TowerOfHanoiGame(GameMaster):
             # change top, add new top, retract ontopof, get rid of empty, change ons
             self.kb.kb_retract(Fact(Statement(["empty", new_location])))
             self.kb.kb_retract(Fact(Statement(["top", object, old_location])))
-            self.kb.kb_retract(Fact(Statement(["onTopOf", object, old_stack.list_of_bindings[0][0].bindings_dict["?X"]])))
+            self.kb.kb_retract(Fact(Statement(["onTopOf", object, old_stack])))
             self.kb.kb_retract(Fact(Statement(["on", object, old_location])))
 
             self.kb.kb_assert(Fact(Statement(["on", object, new_location])))
-            self.kb.kb_assert(Fact(Statement(["top", old_stack.list_of_bindings[0][0].bindings_dict["?X"], old_location])))
+            self.kb.kb_assert(Fact(Statement(["top", old_stack, old_location])))
             self.kb.kb_assert(Fact(Statement(["top", object, new_location])))
 
         # OPTION 2: Move from stack to stack
         elif (old_stack and new_stack):
 
             self.kb.kb_retract(Fact(Statement(["top", object, old_location])))
-            self.kb.kb_retract(Fact(Statement(["onTopOf", object, old_stack.list_of_bindings[0][0].bindings_dict["?X"]])))
-            self.kb.kb_retract(Fact(Statement(["top", new_stack.list_of_bindings[0][0].bindings_dict["?x"], new_location])))
+
+            self.kb.kb_retract(Fact(Statement(["onTopOf", object, old_stack])))
+
+            self.kb.kb_retract(Fact(Statement(["top", new_stack, new_location])))
+
             self.kb.kb_retract(Fact(Statement(["on", object, old_location])))
 
             self.kb.kb_assert(Fact(Statement(["on", object, new_location])))
-            self.kb.kb_assert(Fact(Statement(["onTopOf", object, new_stack.list_of_bindings[0][0].bindings_dict["?x"]])))
-            self.kb.kb_assert(Fact(Statement(["top", old_stack.list_of_bindings[0][0].bindings_dict["?X"], old_location])))
+
+            self.kb.kb_assert(Fact(Statement(["onTopOf", object, new_stack])))
+
+            self.kb.kb_assert(Fact(Statement(["top", old_stack, old_location])))
+            
             self.kb.kb_assert(Fact(Statement(["top", object, new_location])))
 
         # OPTION 3: Move from empty to stack
         elif (new_stack):
             self.kb.kb_retract(Fact(Statement(["top", object, old_location])))
-            self.kb.kb_retract(Fact(Statement(["top", new_stack.list_of_bindings[0][0].bindings_dict["?x"], new_location])))
+            self.kb.kb_retract(Fact(Statement(["top", new_stack, new_location])))
             self.kb.kb_retract(Fact(Statement(["on", object, old_location])))
 
-            self.kb.kb_assert(Fact(Statement(["onTopOf", object, new_stack.list_of_bindings[0][0].bindings_dict["?x"]])))
+            self.kb.kb_assert(Fact(Statement(["onTopOf", object, new_stack])))
             self.kb.kb_assert(Fact(Statement(["top", object, new_location])))
             self.kb.kb_assert(Fact(Statement(["empty", old_location])))
             self.kb.kb_assert(Fact(Statement(["on", object, new_location])))
@@ -192,7 +212,9 @@ class TowerOfHanoiGame(GameMaster):
             self.kb.kb_assert(Fact(Statement(["empty", old_location])))
             self.kb.kb_assert(Fact(Statement(["on", object, new_location])))
 
-        self.kb.kb_retract(Fact(movable_statement))
+        for f in facts:
+            if (str(f.statement.predicate) == "movable"):
+                self.kb.kb_retract(f)
         #
         # # for f in facts:
         # #     print(f)
